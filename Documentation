@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Sailing Telemetry Pipeline API Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a5f7a;
+            border-bottom: 2px solid #1a5f7a;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .module-doc {
+            background: #eef7f9;
+            border-left: 4px solid #1a5f7a;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-style: italic;
+            border-radius: 4px;
+        }
+        .element-card, .class-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .func-name, .class-name {
+            margin-top: 0;
+            color: #d9534f;
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+        .class-name {
+            color: #2b6cb0;
+        }
+        .docstring {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-size: 0.95em;
+        }
+        .methods-section {
+            margin-top: 20px;
+            padding-left: 20px;
+            border-left: 2px dashed #cbd5e0;
+        }
+        .method-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .method-card h4 {
+            margin: 0 0 8px 0;
+            font-family: monospace;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1>Sailing Telemetry Pipeline API Reference</h1>
+        <div class='module-doc'><strong>Module Docstring:</strong><br>Sailing Telemetry and Performance Analytics Pipeline API<br><br>This library implements localized chronological normalization, apparent/true wind vector<br>analytics, upwind/downwind tack-bisector estimators, state-transition event classifiers,<br>and performance metrics rating modules.</div>
+        <h2>Module Members</h2>
+        
+            <div class='element-card'>
+                <h3 class='func-name'>def summarize_race_dataset(df, race_name):</h3>
+                <div class='docstring'>Summarizes key statistics and structure of a specific race DataFrame.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    The DataFrame containing the telemetry data for a specific race.<br>race_name : str<br>    The human-readable name of the race.<br><br>Returns:<br>------<br>dict<br>    A dictionary containing total row count, column lists, and start/end temporal boundaries.</div>
+            </div>
+            
+            <div class='element-card'>
+                <h3 class='func-name'>def calculate_apparent_wind_vectors(df, true_wind_speed, true_wind_direction):</h3>
+                <div class='docstring'>Computes Apparent Wind Speed (AWS), Apparent Wind Direction (AWD), and Apparent Wind Angle (AWA)<br>by resolving vector differences between the true wind field and boat velocity vectors.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    Telemetry dataframe containing 'sog_kts' and 'cog_deg'.<br>true_wind_speed : float<br>    True wind speed in knots.<br>true_wind_direction : float<br>    True wind direction in degrees relative to North (0-360).<br><br>Returns:<br>------<br>pandas.DataFrame<br>    DataFrame updated with 'aws_kts', 'awd_deg', and 'awa_deg' columns.</div>
+            </div>
+            
+            <div class='element-card'>
+                <h3 class='func-name'>def estimate_true_wind_direction(df, initial_twd_estimate):</h3>
+                <div class='docstring'>Calculates the optimized True Wind Direction (TWD) axis per race by isolating upwind close-hauled<br>points, splitting them into stable port/starboard tack segments, computing circular averages to<br>prevent 0/360 wrap-around boundary bias, and finding the bisecting centerline.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    Telemetry dataframe containing 'heading_deg' and course variables.<br>initial_twd_estimate : float<br>    Rough manual reference direction of wind in degrees to initiate classification.<br><br>Returns:<br>------<br>float<br>    An optimized mathematical estimate of the True Wind Direction in degrees.</div>
+            </div>
+            
+            <div class='element-card'>
+                <h3 class='func-name'>def calculate_velocity_made_good(df, true_wind_direction):</h3>
+                <div class='docstring'>Calculates the Velocity Made Good (VMG) toward the True Wind (VMG_TW) and Apparent Wind (VMG_AW)<br>to measure sailing efficiency relative to upwind/downwind target destinations.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    Telemetry dataframe containing 'sog_kts' and optimized 'twa_deg' angles.<br>true_wind_direction : float<br>    Optimized True Wind Direction in degrees.<br><br>Returns:<br>------<br>pandas.DataFrame<br>    DataFrame updated with 'vmg_tw_kts' and 'vmg_aw_kts' columns.</div>
+            </div>
+            
+            <div class='element-card'>
+                <h3 class='func-name'>def detect_maneuvers_state_machine(df, true_wind_direction, transition_window):</h3>
+                <div class='docstring'>Detects sailboat tacks and gybes using a robust state-transition engine.<br>Tacks are isolated when the heading crosses the true wind axis between stable port and<br>starboard close-hauled headings within a configurable physical crossing timeframe.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    Telemetry dataframe containing optimized TWA and heading vectors.<br>true_wind_direction : float<br>    True Wind Direction in degrees.<br>transition_window : int, default 15<br>    Maximum physical time window in seconds allowed for a stable tack transition.<br><br>Returns:<br>------<br>pandas.DataFrame<br>    DataFrame updated with labeled 'maneuver' events.</div>
+            </div>
+            
+            <div class='element-card'>
+                <h3 class='func-name'>def evaluate_maneuver_performance(df, maneuver_index, cooldown_seconds):</h3>
+                <div class='docstring'>Compiles a comprehensive performance scorecard rating for individual maneuvers.<br>Calculates entry speed, duration within the core turn, speed recovery timestamps, and integrated<br>Velocity Made Good (VMG) lost in the performance dip window.<br><br>Parameters:<br>----------<br>df : pandas.DataFrame<br>    Telemetry dataframe.<br>maneuver_index : int<br>    Index of the triggered transition event.<br>cooldown_seconds : int, default 10<br>    Minimum time spacing required between separate maneuver classifications.<br><br>Returns:<br>------<br>dict<br>    Metric dictionary containing speed ratings, durations, recovery metrics, and net VMG loss.</div>
+            </div>
+            
+    </div>
+</body>
+</html>
